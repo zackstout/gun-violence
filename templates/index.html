@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>gun violence</title>
+</head>
+<body>
+  <h3>gun violence data animation</h3>
+  <div class="monthEnter">
+    Enter a month:
+    <input type="text" class='monthIn' name="" value="01">
+    <button type="button" class="sub" name="button">Query month</button>
+
+    <svg width="800" height="700" class="chart" style="padding:10px; margin:10px"></svg>
+  </div>
+
+  <div class="monthEnter">
+    Enter a state:
+    <input type="text" class='stateIn' name="" value="Texas">
+    <button type="button" class="sub1" name="button">Query state</button>
+
+    <svg width="800" height="700" class="chart2"></svg>
+  </div>
+
+
+
+  <!-- jQuery and d3: -->
+  <script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous">
+  </script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+
+  <!-- Javascript: -->
+  <script type="text/javascript">
+
+
+  // Ok I'm not too sure what we did (add the .exit()?) but it's responding to new data now. Still no nice animation though.
+  function updateData(dataIn, selector, divisor, ratio) {
+    circles = d3.select(selector)
+    .selectAll("rect")
+    .data(dataIn)
+    // This is the key part, doing this before .enter():
+    .attr('width', function(d, ind) {
+      console.log(d);
+      return d * ratio;
+    })
+
+    .enter().append("rect")
+    .style("fill", "steelblue")
+    .attr('x', 0)
+    .attr('y', function(d, ind) {
+      return ind * 700 / divisor;
+    })
+    .attr('width', function(d, ind) {
+      console.log(d);
+      return d * ratio;
+    })
+    .attr('height', 700 / divisor)
+    circles.transition()
+    .attr('width', function(d, ind) {
+      console.log(d);
+      return d * ratio;
+    })
+    circles.exit().remove();
+
+  }
+
+
+
+  $(document).ready(function() {
+    var circles; // not sure if this necessary any longer
+
+    // Click listeners:
+    $('.sub').on('click', function() {
+      var month = $('.monthIn').val();
+      $.get('/month?mo=' + month)
+      .done(function(res) {
+        var parsed = JSON.parse(res)
+        console.log(parsed);
+        var max = Math.max.apply(Math, parsed.data);
+        var ratio = 700 / max;
+        updateData(parsed.data, ".chart", 51, ratio);
+        
+        // d3.select(".chart")
+        // .selectAll("rect")
+        // .append("text")
+        // .attr("class", "x label")
+        // .attr("text-anchor", "end")
+        // .attr("x", 800)
+        // .attr("y", 700 - 6)
+        // .text("income per capita, inflation-adjusted (dollars)");
+        // d3.select(".chart")
+        // .selectAll("rect")
+        // .append("text")
+        // .attr("class", "y label")
+        // .attr("text-anchor", "end")
+        // .attr("y", 6)
+        // .attr("dy", ".75em")
+        // .attr("transform", "rotate(-90)")
+        // .text("life expectancy (years)");
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+    });
+
+
+    $('.sub1').on('click', function() {
+      var state = $('.stateIn').val();
+      $.get('/state?st=' + state)
+      .done(function(res) {
+        var parsed = JSON.parse(res)
+        console.log(parsed);
+        var max = Math.max.apply(Math, parsed.data);
+        var ratio = 700 / max;
+        // updateData(parsed.data);
+        updateData(parsed.data, ".chart2", 12, ratio);
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+    });
+  });
+
+  </script>
+</body>
+
+</html>
